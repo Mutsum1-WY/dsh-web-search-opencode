@@ -1,6 +1,6 @@
 # dsh-web-search-opencode
 
-把 DeepSeek Harness 的网页搜索接到 **OpenCode Go** 订阅上的第三方 DSH 插件（组合包）。v1.1.0 起在 **10 个实测可用的 OpenCode Go 模型、3 种协议**之间自动兜底：内置 `web_search` 改由 OpenCode Go 执行，`web_fetch` 仍走内置 HTTP 抓取。适用于 DSH 0.2.x（本机 0.2.1-rc.3 / profile `desktop`），许可 MIT。
+把 DeepSeek Harness 的网页搜索接到 **OpenCode Go** 订阅上的第三方 DSH 插件（组合包）。v1.1.0 起在 **10 个实测可用的 OpenCode Go 模型、3 种协议**之间自动兜底：内置 `web_search` 改由 OpenCode Go 执行，`web_fetch` 仍走内置 HTTP 抓取。适用于 DSH 0.2.x（验证于 0.2.1-rc.3 / profile `desktop`），许可 MIT。
 
 ## 这是什么
 - 向 `ctx.web` 注册搜索提供方 **`opencode-go`**：每次搜索按候选链依次尝试模型，返回第一条真正带来源的结果（`WebSearchResult`：url / title / snippet / publishedAt，按 URL 去重）。
@@ -54,7 +54,7 @@ OpenCode Go 网关会把 `web_search` 工具静默丢掉：Anthropic Messages �
 | `test/provider-smoke.mjs` | 不经过 DSH 的真实搜索自检（会依次验证默认链、OpenAI Responses、Gemini 协议） |
 | `LICENSE` | MIT |
 
-`test/` 不在 `package.json` 的 `files` 列表里：npm/压缩包安装的副本不含自检脚本，本地 `link:` 安装可直接用工作区文件。
+`test/` 不在 `package.json` 的 `files` 列表里：npm/压缩包安装的副本不含自检脚本，本地 `link:` 安装可直接用源码目录里的文件。
 
 ## 安装
 
@@ -64,15 +64,15 @@ OpenCode Go 网关会把 `web_search` 工具静默丢掉：Anthropic Messages �
 
 1. 左侧栏打开 **插件** 页。
 2. 点 **添加插件** 右边的箭头 → **安装第三方插件**。
-3. 输入本地目录绝对路径：`E:\凑鲸鱼\plugins\dsh-web-search-opencode`
+3. 输入本插件的 GitHub 仓库地址（`https://github.com/Mutsum1-WY/dsh-web-search-opencode`），或本地插件源码目录的绝对路径。
 4. 点 **安装**。Host 先检查包名/版本/简介并确认含组合包 patch，再由 pnpm 以 `link:` 依赖装进 profile；**安装默认启用**。
-5. 完成后 **已安装插件** 里出现 **OpenCode 网页搜索** 卡片；打开可见行 `web-search-opencode`、它覆盖的 `web` 行，以及「来源信息」（本机为 `link:E:\凑鲸鱼\plugins\dsh-web-search-opencode`，版本 `1.1.0`）。
-6. 若安装完成时提示需要重启（本机首次安装返回 `restart-required`，原因是 profile 解析目录变化，属 DSH 侧行为），关闭并重新打开 DSH 桌面端即可，重启后组合包才真正加载。
+5. 完成后 **已安装插件** 里出现 **OpenCode 网页搜索** 卡片；打开可见行 `web-search-opencode`、它覆盖的 `web` 行，以及「来源信息」（显示安装来源与版本，如 `github:<owner>/<repo>` 或 `link:<本地插件目录>`、版本 `1.1.0`）。
+6. 若安装完成时提示需要重启（首次安装可能返回 `restart-required`，原因是 profile 解析目录变化，属 DSH 侧行为），关闭并重新打开 DSH 桌面端即可，重启后组合包才真正加载。
 
 **方式二：CLI（等价写法）**
 
 ```powershell
-dsh plugin --profile desktop add "E:\凑鲸鱼\plugins\dsh-web-search-opencode"
+dsh plugin --profile desktop add "<本地插件目录>"
 ```
 
 `dsh plugin` 是 pnpm 转发器：在 profile 目录执行 `pnpm add`，成功后把声明了 `dsh.bundle` 的依赖自动追加进 profile `package.json` 的 `dsh.profile.bundles`。`--profile` 是启动器参数，必须写在 pnpm 参数之前；需要 `pnpm` 在 PATH 上。CLI 装完若插件页没变化，重启 DSH。
@@ -152,13 +152,13 @@ patch 是整行 `config` 替换、不是深合并；没写的字段由 `index.js
 不经过 DSH，直接真实跑一次搜索：
 
 ```powershell
-cd E:\凑鲸鱼\plugins\dsh-web-search-opencode
+cd <本地插件目录>
 node test/provider-smoke.mjs "DeepSeek Harness 第三方插件"
 ```
 
-脚本 `import` 本包的 `apply()` 并用 fake ctx 注册；断言恰好注册一个 id 为 `opencode-go` 的提供方、`available()` 为 true，再真实调用搜索，会依次验证默认候选链、OpenAI Responses 协议与 Gemini 协议，打印提供方 id、耗时、sources 数量与前 3 条 title/url，任一步失败以非 0 退出。用 DSH 自带的 node（本机 v24.21.0）即可。密钥来源先是 `OPENCODE_GO_API_KEY` 环境变量、再是 `%USERPROFILE%\.dsh\.credentials.yaml`，输出不含密钥原文；脚本会把 `DSH_HOME` 重定向到 `test/.tmp-home`，不污染真实会话文件。
+脚本 `import` 本包的 `apply()` 并用 fake ctx 注册；断言恰好注册一个 id 为 `opencode-go` 的提供方、`available()` 为 true，再真实调用搜索，会依次验证默认候选链、OpenAI Responses 协议与 Gemini 协议，打印提供方 id、耗时、sources 数量与前 3 条 title/url，任一步失败以非 0 退出。用 DSH 自带的 node（v24+）即可。密钥来源先是 `OPENCODE_GO_API_KEY` 环境变量、再是 `%USERPROFILE%\.dsh\.credentials.yaml`，输出不含密钥原文；脚本会把 `DSH_HOME` 重定向到 `test/.tmp-home`，不污染真实会话文件。
 
-本机 2026-10-26 实测输出示例（退出码 0，整轮约 87~115s）：
+2026-10-26 实测输出示例（退出码 0，整轮约 87~115s）：
 
 ```text
 [PASS] constants            DEFAULT_MODEL=minimax-m3.1-flash chain=10
@@ -171,7 +171,7 @@ node test/provider-smoke.mjs "DeepSeek Harness 第三方插件"
 
 ## 更新、卸载与发布
 
-- **更新**：本机是 `link:` 安装，改 `E:\凑鲸鱼\plugins\dsh-web-search-opencode` 里的代码后重启 DSH 即加载新代码；也可在插件页移除再装一次。组合包详情页「来源信息」显示当前来源与版本（本包 1.1.0）。
+- **更新**：如果是 `link:` 安装，改插件源码目录里的代码后重启 DSH 即加载新代码；也可在插件页移除再装一次。组合包详情页「来源信息」显示当前来源与版本（本包 1.1.0）。
 - **卸载**：插件页 → 已安装插件 → 打开组合包 → 卸载（会要求确认）。卸载会取消选择、卸载运行时贡献并 `pnpm remove`，之后搜索回内置 DeepSeek。不要手工删 `node_modules` 或 patch 行，容易留下「已选但未装」的坏状态。
 - **发布成可分享插件（可选）**：① 去掉 `package.json` 的 `"private": true`（`npm publish` 需要；`npm pack` 本身可用）；② `npm pack` 生成 tarball 供安装对话框选择，或推 GitHub 用 `github:user/repo` / `git+https://...` 安装，或发布到 npm 后填包名（先确认包名可用或改用 scope）；③ 发布内容由 `files` 决定，已含入口/patch/locale/icon/README/LICENSE，不含 `test/`；④ 使用者需要自己的 `OPENCODE_GO_API_KEY`，且所用模型要在其 Go 订阅里可用（不支持会被自动跳过）。
 
@@ -195,15 +195,15 @@ node test/provider-smoke.mjs "DeepSeek Harness 第三方插件"
 
 ## 来源与许可
 
-- 本工作区自研（2026-10-26，v1.1.0 加入多模型/多协议兜底，替代 v1.0 的单模型 Anthropic 实现）；协议形状参考内置 `dsh-web-search-deepseek` 的 Anthropic Messages + 原生 `web_search` 做法，但代码独立、不 import 任何 `@deepseek-ai/*` 包。
-- 模型表里的可用性、协议归属与耗时为本机 2026-10-26 实测结论，不是 OpenCode Go 的长期承诺；上游变则重测。
-- 许可：MIT，见 `LICENSE`（Copyright 2026 凑鲸鱼 workspace）。
-- 旧方案（本地代理 / patch 手工挂载）已归档，回滚步骤见 `E:\凑鲸鱼\plugins\legacy\README.md`，与本包不要混用。
-- 关闭本包后搜索回内置 `deepseek-official`；它缺少有效 DeepSeek 凭据时会报 `WEB_PROVIDER_CREDENTIAL_MISSING`（本机曾因 key 无效直接见到上游 `401`，两者是同一类问题的不同表现）。
+- 本项目自研（2026-10-26，v1.1.0 加入多模型/多协议兜底，替代 v1.0 的单模型 Anthropic 实现）；协议形状参考内置 `dsh-web-search-deepseek` 的 Anthropic Messages + 原生 `web_search` 做法，但代码独立、不 import 任何 `@deepseek-ai/*` 包。
+- 模型表里的可用性、协议归属与耗时为 2026-10-26 实测结论，不是 OpenCode Go 的长期承诺；上游变则重测。
+- 许可：MIT，见 `LICENSE`。
+- 旧方案（本地代理 / patch 手工挂载）已归档，与本包不要混用。
+- 关闭本包后搜索回内置 `deepseek-official`；它缺少有效 DeepSeek 凭据时会报 `WEB_PROVIDER_CREDENTIAL_MISSING`（key 无效时也可能直接看到上游 `401`，两者是同一类问题的不同表现）。
 
 ## 维护者说明
 
 - `test/` 刻意不进 `package.json` 的 `files`：发布包保持精简；本地 `link:` 安装不受 `files` 影响，自检脚本照常可用。
-- 当前清单未声明 `repository` / `author`：本包目前只作本机工作区第三方插件使用；若要发布到 npm 或 GitHub，再补这两个字段即可。
+- 当前清单未声明 `repository` / `author`：本包目前作为独立第三方插件使用；若要发布到 npm 或 GitHub，再补这两个字段即可。
 - **不要**加 `engines.dsh` 或任何 `@deepseek-ai/*` 的 peerDependencies：会触发 DSH 版本兼容检查，版本范围不匹配时插件管理器会直接拒绝安装；本包零依赖正是为了避开这一点。
-- 模型可用性、协议归属与耗时为 2026-10-26 本机实测结论；OpenCode Go 的模型清单或端点变化后直接改 `SEARCH_MODELS` 重装即可（`test/provider-smoke.mjs` 会跑真实搜索验证）。
+- 模型可用性、协议归属与耗时为 2026-10-26 实测结论；OpenCode Go 的模型清单或端点变化后直接改 `SEARCH_MODELS` 重装即可（`test/provider-smoke.mjs` 会跑真实搜索验证）。
