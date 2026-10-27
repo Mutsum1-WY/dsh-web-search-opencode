@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "OpenCode 网页搜索",
+    "description": "用 OpenCode Go 订阅执行网页搜索；自动在 10 个实测可用的搜索模型间兜底，把来源交给内置的 web_search 工具。"
+  }
+}

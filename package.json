@@ -1,0 +1,37 @@
+{
+  "name": "dsh-web-search-opencode",
+  "version": "1.1.0",
+  "private": true,
+  "description": "OpenCode Go backed web search for DeepSeek Harness: a self-contained third-party bundle that registers the opencode-go provider and searches through ten verified OpenCode Go models (Anthropic Messages, OpenAI Responses, Google Gemini protocols) with automatic fallback.",
+  "type": "module",
+  "main": "index.js",
+  "icon": "./icon.svg",
+  "exports": {
+    ".": "./index.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "dsh-bundle",
+    "web-search",
+    "opencode"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "license": "MIT"
+}

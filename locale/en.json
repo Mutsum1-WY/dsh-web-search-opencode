@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "OpenCode Web Search",
+    "description": "Runs web searches with an OpenCode Go subscription, falling back across ten verified search models, and serves the sources to the built-in web_search tool."
+  }
+}

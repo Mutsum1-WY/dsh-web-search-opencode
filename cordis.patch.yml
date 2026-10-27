@@ -1,0 +1,25 @@
+# dsh-web-search-opencode bundle layer.
+#
+# This file is the whole reason this package is a third-party DSH plugin: the
+# package manifest declares `dsh.bundle.patch`, so installing the package
+# (`dsh plugin add <dir>` / plugin_manager install_bundle) applies this layer
+# without anyone editing the profile's cordis.patch.yml by hand.
+#
+# Layers later than this one (the profile's own cordis.patch.yml, --patch
+# overlays) override these rows by id. Disabling the bundle in the Web UI
+# (插件 page -> this bundle's switch) removes the whole layer, so `web` falls
+# back to its previous provider (`deepseek-official`) on its own.
+
+# 1. Register the search provider half. The row id is also what the row switch
+#    in the plugin page addresses; keep it stable.
+- insert:
+    - id: web-search-opencode
+      name: dsh-web-search-opencode
+
+# 2. Point the built-in web seam at that provider. A patch override replaces the
+#    complete config, so keep the fetch provider the base layer selected.
+- id: web
+  name: '@deepseek-ai/dsh-web'
+  config:
+    searchProvider: opencode-go
+    fetchProvider: http
